@@ -18,5 +18,5 @@
 
 ### TODO
 
-- Unit test (with JUnit)
-- Documentation
+- <del>Unit test (with JUnit)</del>
+- <del>Documentation</del>
