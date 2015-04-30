@@ -2,6 +2,8 @@ package com.Team06;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,24 +16,21 @@ public class PM
     private static class SingletonHolder
     {
         public final static Map<String, Integer> instance = new HashMap<String, Integer>();
-        public static String prevDateTime = getDateTime(-1);
+        public static String prevDateTime = "";
     }
 
-    // refer to:
-    // https://github.com/TJSoftwareReuse/2012T08/blob/master/PM/src/com/team8/PerformanceManagement/PM.java
-    public static String getDateTime(int moreMinute)
+    public static String getDateTime()
     {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, moreMinute);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
-
-        return dateFormat.format(calendar.getTime());
+        LocalDateTime ldt = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
+        String formattedDateTime = ldt.format(formatter);
+        return formattedDateTime;
     }
 
 
     public synchronized static void sendMsg(String key, int value)
     {
-        String dateTime = getDateTime(0);
+        String dateTime = getDateTime();
         if (!dateTime.equals(SingletonHolder.prevDateTime))
         {
             SingletonHolder.instance.clear();
