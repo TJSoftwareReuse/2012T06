@@ -26,6 +26,14 @@ public class Server {
 
 	public final static int SERVICE_PORT = 3999;
 	public final static String CONFIG_FILE_NAME = "settings.txt";
+	// load fault manager
+	static FaultManagement fm = FaultManagement.getInstance();
+	
+	// load perf manager
+	PM pm = new PM();
+	
+	// load license manager
+	static LisenceClass lic = new LisenceClass();
 	
 	public static void writeTestData()
 	{
@@ -147,14 +155,9 @@ public class Server {
 		cfg.writeProperties(CONFIG_FILE_NAME, "Member_Team_46", "10");
 	}
 	
-	public static void main(String[] args) throws IOException {
-		writeTestData();
-		
-		// load config file
+	public static Map<String, String> Team(){
 		ConfigComponent cfg = new ConfigComponent();
 		Properties prop = cfg.readProperties(CONFIG_FILE_NAME);
-		
-		// read from database
 		int teamCount = Integer.parseInt(prop.getProperty("TeamCount","0"));
 		int memberCount = Integer.parseInt(prop.getProperty("MemberCount","0"));
 		String teamNames[] = new String[teamCount];
@@ -170,15 +173,75 @@ public class Server {
 				memberTeam.put(memberNames[i-1], teamNames[teamID-1]);
 			}
 		}
+		return memberTeam;
+	}
+	
+	public static String Result(Map<String, String> Team,String Stu){
+		PM.sendMsg("ReceivedMessages",1);
+		if (lic.useLisence())
+			{
+				// process request
+				fm.generateWarningMessage("In Service");
+				PM.sendMsg("AcceptedRequests",1);
+				
+				// query
+				if (Team.containsKey(Stu))
+				{
+					String stuTeam = Team.get(Stu);
+					PM.sendMsg("ResponseMessages",1);
+					return "Your team name is "+stuTeam;
+				}else
+				{
+					PM.sendMsg("ResponseMessages",1);
+					return "Member "+Stu+" not found";
+				}				
+				
+			}
+		else{
+				// reject
+				fm.generateWarningMessage("Reject due to license expiration");
+				PM.sendMsg("RejectedRequests",1);
+				
+				PM.sendMsg("ResponseMessages",1);
+				return "Denied";
+			}
 		
-		// load fault manager
-		FaultManagement fm = FaultManagement.getInstance();
+	}
+	
+	public static void main(String[] args) throws IOException {
+		writeTestData();
+		Map<String,String> memberTeam = new HashMap<String,String>();
+		memberTeam=Team();
 		
-		// load perf manager
-		PM pm = new PM();
+		// load config file
+//		ConfigComponent cfg = new ConfigComponent();
+//		Properties prop = cfg.readProperties(CONFIG_FILE_NAME);
 		
-		// load license manager
-		LisenceClass lic = new LisenceClass();
+		// read from database
+//		int teamCount = Integer.parseInt(prop.getProperty("TeamCount","0"));
+//		int memberCount = Integer.parseInt(prop.getProperty("MemberCount","0"));
+//		String teamNames[] = new String[teamCount];
+//		String memberNames[] = new String[memberCount];
+//		Map<String,String> memberTeam = new HashMap<String,String>();
+//		for (int i=1;i<=teamCount;i++) teamNames[i-1]=prop.getProperty("TeamName_"+i);
+//		for (int i=1;i<=memberCount;i++)
+//		{
+//			memberNames[i-1]=prop.getProperty("MemberName_"+i);
+//			int teamID = Integer.parseInt(prop.getProperty("Member_Team_"+i));
+//			if (teamID>=1 && teamID<=teamCount)
+//			{
+//				memberTeam.put(memberNames[i-1], teamNames[teamID-1]);
+//			}
+//		}
+		
+//		// load fault manager
+//		FaultManagement fm = FaultManagement.getInstance();
+//		
+//		// load perf manager
+//		PM pm = new PM();
+//		
+//		// load license manager
+//		LisenceClass lic = new LisenceClass();
 		
 		// start service
 		ServerSocket srvSock = new ServerSocket(SERVICE_PORT);
@@ -201,35 +264,36 @@ public class Server {
 			
 			// receive student name
 			String stuName = reader.readLine().replace("\n", "");
-			PM.sendMsg("ReceivedMessages",1);
+			writer.println(Result(memberTeam,stuName));
+			
+//			PM.sendMsg("ReceivedMessages",1);
 			
 			// check if license is valid
-			if (lic.useLisence())
-			{
-				// process request
-				fm.generateWarningMessage("In Service");
-				PM.sendMsg("AcceptedRequests",1);
-				
-				// query
-				if (memberTeam.containsKey(stuName))
-				{
-					String stuTeam = memberTeam.get(stuName); 
-					writer.println("Your team name is "+stuTeam);
-				}else
-				{
-					writer.println("Member "+stuName+" not found");
-				}
-				
-				PM.sendMsg("ResponseMessages",1);
-			}else
-			{
-				// reject
-				fm.generateWarningMessage("Reject due to license expiration");
-				PM.sendMsg("RejectedRequests",1);
-				
-				PM.sendMsg("ResponseMessages",1);
-				writer.println("Denied");
-			}
+//			if (lic.useLisence())
+//			{
+//				// process request
+//				fm.generateWarningMessage("In Service");
+//				PM.sendMsg("AcceptedRequests",1);
+//				
+//				// query
+//				if (memberTeam.containsKey(stuName))
+//				{
+//					String stuTeam = memberTeam.get(stuName); 
+//					writer.println("Your team name is "+stuTeam);
+//				}else
+//				{
+//					writer.println("Member "+stuName+" not found");
+//				}
+//				
+//				PM.sendMsg("ResponseMessages",1);
+//			}else 			{
+//				// reject
+//				fm.generateWarningMessage("Reject due to license expiration");
+//				PM.sendMsg("RejectedRequests",1);
+//				
+//				PM.sendMsg("ResponseMessages",1);
+//				writer.println("Denied");
+//			}
 
 			writer.flush();
 			clntSock.close();
