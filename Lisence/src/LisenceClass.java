@@ -6,6 +6,14 @@ public class LisenceClass {
 	public LisenceClass() {		
 	}
 	
+	public void resetLisenceNum(int newNum)
+	{
+		UsedService = 0;
+		TotalService = _newNum;
+		System.out.println("Lisence number changed to: "+ newNum);
+		System.out.println("Used lisence number has reset to 0");
+	}
+	
 	public boolean useLisence() {
 		if(UsedService < 10){
 			UsedService += 1;
