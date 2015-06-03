@@ -6,6 +6,22 @@ public class LisenceClass {
 	public LisenceClass() {		
 	}
 	
+	public int totalService()
+	{
+		return TotalService;
+	}
+
+	public int usedService()
+	{
+		return UsedService;
+	}
+
+	public int restService()
+	{
+		int rest = TotalService - UsedService;
+		return rest;
+	}
+
 	public void resetLisenceNum(int newNum)
 	{
 		UsedService = 0;
