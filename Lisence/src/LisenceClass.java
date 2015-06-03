@@ -25,7 +25,7 @@ public class LisenceClass {
 	public void resetLisenceNum(int newNum)
 	{
 		UsedService = 0;
-		TotalService = _newNum;
+		TotalService = newNum;
 		System.out.println("Lisence number changed to: "+ newNum);
 		System.out.println("Used lisence number has reset to 0");
 	}
